@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package common;
+
+option go_package = "go-microservice-boilerplate/internal/proto/common";
+
+message StatusResponse {
+  int32 code = 1;
+  string message = 2;
+  bool success = 3;
+}
+
+message PaginationRequest {
+  int32 page = 1;
+  int32 limit = 2;
+}
+
+message PaginationResponse {
+  int32 page = 1;
+  int32 limit = 2;
+  int32 total = 3;
+  int32 total_pages = 4;
+}
+
+message Empty {}

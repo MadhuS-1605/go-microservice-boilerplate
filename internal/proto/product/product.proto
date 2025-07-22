@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package product;
+
+option go_package = "go-microservice-boilerplate/internal/proto/product";
+
+import "internal/proto/common/common.proto";
+
+service ProductService {
+  rpc CreateProduct(CreateProductRequest) returns (ProductResponse);
+  rpc GetProduct(GetProductRequest) returns (ProductResponse);
+  rpc UpdateProduct(UpdateProductRequest) returns (ProductResponse);
+  rpc DeleteProduct(DeleteProductRequest) returns (common.StatusResponse);
+  rpc ListProducts(ListProductsRequest) returns (ListProductsResponse);
+}
+
+message Product {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  double price = 4;
+  int32 quantity = 5;
+  string category = 6;
+  string sku = 7;
+  int64 created_at = 8;
+  int64 updated_at = 9;
+}
+
+message CreateProductRequest {
+  string name = 1;
+  string description = 2;
+  double price = 3;
+  int32 quantity = 4;
+  string category = 5;
+  string sku = 6;
+}
+
+message GetProductRequest {
+  string id = 1;
+}
+
+message UpdateProductRequest {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  double price = 4;
+  int32 quantity = 5;
+  string category = 6;
+}
+
+message DeleteProductRequest {
+  string id = 1;
+}
+
+message ListProductsRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  string search = 3;
+  string category = 4;
+}
+
+message ProductResponse {
+  Product product = 1;
+  common.StatusResponse status = 2;
+}
+
+message ListProductsResponse {
+  repeated Product products = 1;
+  int32 total = 2;
+  common.StatusResponse status = 3;
+}

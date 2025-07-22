@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: microservices_mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: microservices_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./deployments/mongodb/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - microservices_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: microservices_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - microservices_network
+
+  gateway:
+    build: ..
+    container_name: microservices_gateway
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017
+      - REDIS_ADDR=redis:6379
+      - USER_SERVICE_HOST=user-service
+      - PRODUCT_SERVICE_HOST=product-service
+    command: ["./main", "web"]
+    depends_on:
+      - mongodb
+      - redis
+      - user-service
+      - product-service
+    networks:
+      - microservices_network
+
+  user-service:
+    build: ..
+    container_name: microservices_user_service
+    restart: unless-stopped
+    ports:
+      - "50051:50051"
+    environment:
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017
+      - REDIS_ADDR=redis:6379
+      - USER_SERVICE_PORT=50051
+    command: ["./main", "user"]
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - microservices_network
+
+  product-service:
+    build: ..
+    container_name: microservices_product_service
+    restart: unless-stopped
+    ports:
+      - "50052:50052"
+    environment:
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017
+      - REDIS_ADDR=redis:6379
+      - PRODUCT_SERVICE_PORT=50052
+    command: ["./main", "product"]
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - microservices_network
+
+volumes:
+  mongodb_data:
+  redis_data:
+
+networks:
+  microservices_network:
+    driver: bridge
